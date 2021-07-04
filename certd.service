@@ -1,0 +1,9 @@
+[Unit]
+Description=certd
+
+[Service]
+ExecStart=/usr/local/bin/certd
+EnvironmentFile=/etc/default/certd
+
+[Install]
+WantedBy=multi-user.target
