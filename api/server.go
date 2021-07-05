@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 
@@ -33,17 +34,24 @@ func (s *Server) Start(address string, domain string) error {
 	})
 }
 
+func errorPage(w http.ResponseWriter, statusCode int, format string, args ...interface{}) {
+	content := fmt.Sprintf(format, args...)
+	w.WriteHeader(statusCode)
+	if _, err := w.Write([]byte(content)); err != nil {
+		log.Printf("failed writing error page")
+		return
+	}
+}
+
 func (s *Server) getCertificate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("method not allowed"))
+		errorPage(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 	domain := r.URL.Query().Get("domain")
 	res, err := s.mgr.GetCertificate(domain)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("unable to get certificate"))
+		errorPage(w, http.StatusInternalServerError, "unable to get certificate: %v", err)
 		return
 	}
 	apires := &client.GetCertificateResponse{
@@ -52,8 +60,8 @@ func (s *Server) getCertificate(w http.ResponseWriter, r *http.Request) {
 		PrivateKey:  res.PrivateKey,
 	}
 	if err := json.NewEncoder(w).Encode(apires); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("failed serializing response: %v", err)))
+		errorPage(w, http.StatusInternalServerError, "failed serializing response: %v", err)
+		return
 	}
 }
 
@@ -62,14 +70,12 @@ func filterRequests(nets []net.IPNet) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			addr, _, err := net.SplitHostPort(r.RemoteAddr)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("bad remote addr format: %v", err)))
+				errorPage(w, http.StatusInternalServerError, "bad remote addr format: %v", err)
 				return
 			}
 			ip := net.ParseIP(addr)
 			if ip == nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("unable to parse remote ip address: %v", addr)))
+				errorPage(w, http.StatusInternalServerError, "unable to parse remote ip address: %v", addr)
 				return
 			}
 			allowed := false
@@ -80,8 +86,7 @@ func filterRequests(nets []net.IPNet) func(next http.Handler) http.Handler {
 				}
 			}
 			if !allowed {
-				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte("you are not allowed"))
+				errorPage(w, http.StatusForbidden, "you are not allowed")
 				return
 			}
 			next.ServeHTTP(w, r)

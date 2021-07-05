@@ -31,7 +31,7 @@ func main() {
 	mgr.RenewLoop(context.Background())
 	_, err = mgr.GetCertificate(cfg.Hostname)
 	if err != nil {
-		log.Fatal("get cert for hostname failed: %s: ", cfg.Hostname, err)
+		log.Fatalf("get cert for hostname failed: %s: %v", cfg.Hostname, err)
 	}
 
 	srv := api.NewServer(cfg, mgr)

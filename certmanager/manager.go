@@ -124,7 +124,7 @@ func certResultFromResource(domain string, r CertificateResource) (*CertificateR
 	a, _ := pem.Decode([]byte(r.Certificate))
 	c, err := x509.ParseCertificate(a.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("x509 parse crt: %w: %v", err)
+		return nil, fmt.Errorf("x509 parse crt: %w", err)
 	}
 	b, _ := pem.Decode([]byte(r.IssuerCertificate))
 	issuer, err := x509.ParseCertificate(b.Bytes)
