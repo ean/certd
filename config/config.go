@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"time"
 )
 
 type IPNet net.IPNet
@@ -40,6 +41,8 @@ type Config struct {
 	AllowedIPNets       []IPNet              `envconfig:"ALLOWED_IPNETS" required:"true"`
 	ACMEIssuer          string               `default:"https://acme-staging-v02.api.letsencrypt.org/directory" envconfig:"ACME_ISSUER"`
 	DomainProviderPairs []DomainProviderPair `envconfig:"DOMAIN_SUFFIXES_PROVIDER" required:"true"`
+	RenewWhenRemaining  time.Duration        `envconfig:"RENEW_WHEN_REMAINING" default:"720h"`
+	PreferredChain      string               `envconfig:"PREFERRED_CHAIN" default:""`
 }
 
 func (cfg Config) ApprovedDomainSuffix(domain string) bool {

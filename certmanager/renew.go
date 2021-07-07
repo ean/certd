@@ -14,6 +14,7 @@ func (m *Manager) renew(ctx context.Context) {
 		return
 	}
 	model := &CertificateModel{}
+	renew := []CertificateResource{}
 	defer rows.Close()
 	for rows.Next() {
 		if err := rows.StructScan(model); err != nil {
@@ -23,18 +24,24 @@ func (m *Manager) renew(ctx context.Context) {
 		res := CertificateResource{}
 		if err := json.Unmarshal([]byte(model.Resource), &res); err != nil {
 			log.Printf("Failed unmarshal cert resource: %s: %v", model.Domain, err)
+			return
 		}
 		x, err := certResultFromResource(model.Domain, res)
 		if err != nil {
 			log.Printf("Failed creating certificate result: %s: %v", model.Domain, err)
+			return
 		}
-		if time.Now().Add(30 * time.Hour * 24).After(x.Certificate.NotAfter) {
-			if err := m.renewCertificate(res); err != nil {
-				log.Printf("renew failed: %s: %v", res.Domain, err)
-			}
+		log.Printf("  %v %v", x.Certificate.NotAfter, time.Now().Add(m.cfg.RenewWhenRemaining))
+		if time.Now().Add(m.cfg.RenewWhenRemaining).After(x.Certificate.NotAfter) {
+			renew = append(renew, res)
 		}
 	}
-
+	rows.Close()
+	for _, res := range renew {
+		if err := m.renewCertificate(res); err != nil {
+			log.Printf("renew failed: %s: %v", res.Domain, err)
+		}
+	}
 }
 
 func (m *Manager) RenewLoop(ctx context.Context) {

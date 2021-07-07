@@ -83,9 +83,11 @@ func (m *Manager) obtainCertificate(domain string) (*CertificateResource, error)
 		return nil, err
 	}
 	resource, err := c.Certificate.Obtain(certificate.ObtainRequest{
-		Domains:    []string{domain},
-		Bundle:     false,
-		MustStaple: false,
+		Domains:        []string{domain},
+		Bundle:         false,
+		PrivateKey:     nil,
+		MustStaple:     false,
+		PreferredChain: m.cfg.PreferredChain,
 	})
 	if err != nil {
 		return nil, err
@@ -131,10 +133,10 @@ func certResultFromResource(domain string, r CertificateResource) (*CertificateR
 	if err != nil {
 		return nil, fmt.Errorf("x509 parse issuer crt: %w", err)
 	}
-	privKeyPem, _ := pem.Decode([]byte(r.PrivateKey))
-	key, err := x509.ParsePKCS1PrivateKey(privKeyPem.Bytes)
+	privateKeyPem, _ := pem.Decode([]byte(r.PrivateKey))
+	key, err := x509.ParsePKCS1PrivateKey(privateKeyPem.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("parse rsa priv key: %w", err)
+		return nil, fmt.Errorf("parse rsa private key: %w", err)
 	}
 
 	return &CertificateResult{
@@ -186,14 +188,17 @@ func (m *Manager) renewCertificate(res CertificateResource) error {
 	if err != nil {
 		return err
 	}
-	newRes, err := c.Certificate.Renew(certRes, false, false, "")
+
+	newRes, err := c.Certificate.Renew(certRes, false, false, m.cfg.PreferredChain)
 	if err != nil {
 		return err
 	}
+
 	r, err := m.storeCertificateResource(res.Domain, newRes)
 	if err != nil {
 		return err
 	}
+
 	_ = r
 	return nil
 }

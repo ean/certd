@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"log"
-
-	"src.ngrd.no/certd/api"
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/jmoiron/sqlx"
-
 	"github.com/kelseyhightower/envconfig"
 	_ "modernc.org/sqlite"
+	"src.ngrd.no/certd/api"
 	"src.ngrd.no/certd/certmanager"
 	"src.ngrd.no/certd/config"
 )
@@ -34,6 +34,9 @@ func main() {
 		log.Fatalf("get cert for hostname failed: %s: %v", cfg.Hostname, err)
 	}
 
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	srv := api.NewServer(cfg, mgr)
 	log.Fatal("server start: ", srv.Start(cfg.Address, cfg.Hostname))
 }

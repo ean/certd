@@ -31,7 +31,7 @@ func GetClient(cfg config.Config, user registration.User, provider challenge.Pro
 		return nil, err
 	}
 	if err := client.Challenge.SetDNS01Provider(provider); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("set dns01 provider: %w", err)
 	}
 	return client, nil
 }
