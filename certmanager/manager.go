@@ -12,7 +12,7 @@ import (
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/jmoiron/sqlx"
-	"src.ngrd.no/certd/config"
+	"ngrd.no/certd/config"
 )
 
 type Manager struct {

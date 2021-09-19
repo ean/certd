@@ -8,10 +8,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/sys/unix"
 	_ "modernc.org/sqlite"
-	"src.ngrd.no/certd/api"
-	"src.ngrd.no/certd/certmanager"
-	"src.ngrd.no/certd/config"
+	"ngrd.no/certd/api"
+	"ngrd.no/certd/certmanager"
+	"ngrd.no/certd/config"
 )
 
 func main() {
@@ -19,10 +20,13 @@ func main() {
 	if err := envconfig.Process("", &cfg); err != nil {
 		log.Fatalf("failed loading config from environment: %+v", err)
 	}
+
+	oldUmask := unix.Umask(0177)
 	db, err := sqlx.Open("sqlite", cfg.DBPath)
 	if err != nil {
 		log.Fatal("sqlx.Open: ", err)
 	}
+	unix.Umask(oldUmask)
 	certmanager.MustCreateTables(db)
 	mgr, err := certmanager.NewManager(db, cfg)
 	if err != nil {

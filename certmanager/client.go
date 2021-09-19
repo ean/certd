@@ -2,13 +2,24 @@ package certmanager
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/challenge"
 	"github.com/go-acme/lego/v4/lego"
+	legolog "github.com/go-acme/lego/v4/log"
 	"github.com/go-acme/lego/v4/registration"
-	"src.ngrd.no/certd/config"
+	"ngrd.no/certd/config"
+	"ngrd.no/log"
 )
+
+func init() {
+	log, err := log.New(log.WithComponentName("github.com/go-acme/lego"), log.WithWriter(os.Stdout))
+	if err != nil {
+		panic(err)
+	}
+	legolog.Logger = log
+}
 
 func GetClientWithoutProvider(cfg config.Config, user registration.User) (*lego.Client, error) {
 	config := lego.NewConfig(user)

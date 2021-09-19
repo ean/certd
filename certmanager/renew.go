@@ -40,6 +40,8 @@ func (m *Manager) renew(ctx context.Context) {
 	for _, res := range renew {
 		if err := m.renewCertificate(res); err != nil {
 			log.Printf("renew failed: %s: %v", res.Domain, err)
+		} else {
+			log.Printf("Renewed: %s", res.Domain)
 		}
 	}
 }

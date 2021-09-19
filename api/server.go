@@ -8,10 +8,10 @@ import (
 	"net"
 	"net/http"
 
-	"src.ngrd.no/certd/api/client"
-	"src.ngrd.no/certd/certmanager"
-	"src.ngrd.no/certd/config"
-	"src.ngrd.no/certd/helpers"
+	"ngrd.no/certd/api/client"
+	"ngrd.no/certd/certmanager"
+	"ngrd.no/certd/config"
+	"ngrd.no/certd/helpers"
 )
 
 type Server struct {

@@ -13,7 +13,7 @@ import (
 
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/jmoiron/sqlx"
-	"src.ngrd.no/certd/config"
+	"ngrd.no/certd/config"
 )
 
 // You'll need a user or account type that implements acme.User

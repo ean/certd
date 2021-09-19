@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"src.ngrd.no/certd/api/client"
+	"ngrd.no/certd/api/client"
 )
 
 func getKeyPair(domain string) (*tls.Certificate, error) {
