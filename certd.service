@@ -1,9 +1,13 @@
 [Unit]
 Description=certd
+StartLimitInterval=200
+StartLimitBurst=5
 
 [Service]
 ExecStart=/usr/local/bin/certd
 EnvironmentFile=/etc/default/certd
+Restart=always
+restartSec=30
 
 [Install]
 WantedBy=multi-user.target
