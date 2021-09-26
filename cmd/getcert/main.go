@@ -49,7 +49,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "'%s' exist, won't overwrite\n", *keyPtr)
 		os.Exit(1)
 	}
-	if err := ioutil.WriteFile(*certPtr, []byte(res.PrivateKey), 0600); err != nil {
+	if err := ioutil.WriteFile(*keyPtr, []byte(res.PrivateKey), 0600); err != nil {
 		fmt.Fprintf(os.Stderr, "failed writing private key file: %+v\n", err)
 		os.Exit(1)
 	}
@@ -58,7 +58,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "'%s' exist, won't overwrite\n", *bundlePtr)
 		os.Exit(1)
 	}
-	if err := ioutil.WriteFile(*certPtr, []byte(res.Certificate), 0644); err != nil {
+	if err := ioutil.WriteFile(*bundlePtr, []byte(res.Certificate), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "failed writing certificate file: %+v\n", err)
 		os.Exit(1)
 	}
